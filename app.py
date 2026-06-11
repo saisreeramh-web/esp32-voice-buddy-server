@@ -3,35 +3,36 @@ import requests
 
 app = Flask(__name__)
 
-GEMINI_API_KEY = "YOUR_KEY"
+OPENAI_API_KEY = "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"
 
 @app.route("/ask", methods=["POST"])
 def ask():
-
     data = request.json
     prompt = data["text"]
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json"
+    }
 
     payload = {
-        "contents":[
-            {
-                "parts":[
-                    {
-                        "text":prompt
-                    }
-                ]
-            }
+        "model": "gpt-4o-mini",
+        "messages": [
+            {"role": "user", "content": prompt}
         ]
     }
 
-    r = requests.post(url,json=payload)
+    r = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers=headers,
+        json=payload
+    )
 
     result = r.json()
 
-    answer = result["candidates"][0]["content"]["parts"][0]["text"]
+    answer = result["choices"][0]["message"]["content"]
 
-    return jsonify({"reply":answer})
+    return jsonify({"reply": answer})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0",port=10000)
+    app.run(host="0.0.0.0", port=10000)
